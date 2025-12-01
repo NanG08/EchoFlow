@@ -239,12 +239,8 @@ Currently supporting **20+ languages**:
 | Chinese | zh | ✅ Active |
 | Japanese | ja | ✅ Active |
 | Korean | ko | ✅ Active |
-| Arabic | ar | ✅ Active |
 | Hindi | hi | ✅ Active |
-| Dutch | nl | ✅ Active |
-| Polish | pl | ✅ Active |
-| Turkish | tr | ✅ Active |
-| And more... | ... | ✅ Active |
+
 
 ## ⚙️ Configuration
 
@@ -371,8 +367,6 @@ limitations under the License.
 
 Say "ECHO" to start 🎤
 
-Made with ❤️ for privacy-conscious multilingual communication
-
-[Website](https://echoflow.app) • [Documentation](https://docs.echoflow.app) • [Discord](https://discord.gg/echoflow)
+Made with ❤️ for The Claude Challenge
 
 </div>
