@@ -18,7 +18,7 @@ class WaveformView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = ContextCompat.getColor(context, R.color.primary_gradient_start)
+        color = ContextCompat.getColor(context, R.color.primary)
         strokeWidth = 8f
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND

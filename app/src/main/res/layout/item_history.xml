@@ -26,7 +26,7 @@
                 android:layout_weight="1"
                 android:text="EN → ES"
                 android:textSize="12sp"
-                android:textColor="@color/purple_500"
+                android:textColor="@color/primary"
                 android:textStyle="bold" />
 
             <TextView
@@ -55,7 +55,7 @@
             android:text="Hola mundo"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/purple_700" />
+            android:textColor="@color/primary_dark" />
 
     </LinearLayout>
 

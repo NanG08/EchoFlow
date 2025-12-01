@@ -8,8 +8,10 @@
     <!-- Mode Names -->
     <string name="mode_voice">Voice</string>
     <string name="mode_camera">Live Camera</string>
-    <string name="mode_photo">Photo</string>
+    <string name="mode_photo">Photo/Image</string>
     <string name="mode_conversation">Conversation</string>
+    <string name="mode_sign_language">Sign Language</string>
+    <string name="mode_text_entry">Text Entry</string>
 
     <!-- Actions -->
     <string name="action_start">Start</string>

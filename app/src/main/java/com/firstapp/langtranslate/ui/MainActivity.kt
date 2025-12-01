@@ -95,18 +95,51 @@ class MainActivity : AppCompatActivity() {
         checkPermissions()
         loadSettings()
         animateEntrance()
+
+        // Bind translation service on startup
+        bindTranslationService()
     }
 
     private fun setupUI() {
-        // Set default mode as selected
-        binding.btnVoiceMode.isSelected = true
+        // Voice mode is always active (home screen)
+        // Mode buttons switch between additional features
 
-        // Mode selection buttons with haptic feedback
-        binding.btnVoiceMode.setOnClickListener {
+        // Voice/Text toggle buttons
+        binding.chipVoice.setOnClickListener {
+            showVoiceInput()
             performHapticFeedback()
-            switchMode(TranslationMode.VOICE)
+
+            // Update button states
+            binding.chipVoice.backgroundTintList =
+                ContextCompat.getColorStateList(this, R.color.primary)
+            binding.chipVoice.setTextColor(ContextCompat.getColor(this, R.color.white))
+            binding.chipText.backgroundTintList = null
+            binding.chipText.setTextColor(ContextCompat.getColor(this, R.color.text_secondary))
         }
 
+        binding.chipText.setOnClickListener {
+            showTextInput()
+            performHapticFeedback()
+
+            // Update button states
+            binding.chipText.backgroundTintList =
+                ContextCompat.getColorStateList(this, R.color.primary)
+            binding.chipText.setTextColor(ContextCompat.getColor(this, R.color.white))
+            binding.chipVoice.backgroundTintList = null
+            binding.chipVoice.setTextColor(ContextCompat.getColor(this, R.color.text_secondary))
+        }
+
+        // Text input character counter
+        binding.etTextInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                binding.tvCharCount.text = "${s?.length ?: 0} / 500"
+            }
+
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+
+        // Mode selection buttons for additional features
         binding.btnCameraMode.setOnClickListener {
             performHapticFeedback()
             switchMode(TranslationMode.LIVE_CAMERA)
@@ -117,14 +150,9 @@ class MainActivity : AppCompatActivity() {
             switchMode(TranslationMode.PHOTO)
         }
 
-        binding.btnScreenshotMode.setOnClickListener {
+        binding.btnSignLanguageMode.setOnClickListener {
             performHapticFeedback()
-            switchMode(TranslationMode.SCREENSHOT)
-        }
-
-        binding.btnConversationMode.setOnClickListener {
-            performHapticFeedback()
-            switchMode(TranslationMode.CONVERSATION)
+            switchMode(TranslationMode.SIGN_LANGUAGE)
         }
 
         // Translation control
@@ -213,48 +241,111 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showVoiceInput() {
+        // Show voice display, hide text input
+        binding.tvOriginalText.visibility = View.VISIBLE
+        binding.layoutTextInput.visibility = View.GONE
+        binding.tvCharCount.visibility = View.GONE
+
+        // Update button text and behavior
+        binding.btnStartStop.text = getString(R.string.action_start)
+        binding.btnStartStop.icon = ContextCompat.getDrawable(this, R.drawable.ic_mic)
+    }
+
+    private fun showTextInput() {
+        // Show text input, hide voice display
+        binding.tvOriginalText.visibility = View.GONE
+        binding.layoutTextInput.visibility = View.VISIBLE
+        binding.tvCharCount.visibility = View.VISIBLE
+
+        // Update button text and behavior
+        binding.btnStartStop.text = "Translate"
+        binding.btnStartStop.icon = null
+
+        // Focus on text input
+        binding.etTextInput.requestFocus()
+    }
+
     private fun switchMode(mode: TranslationMode) {
         currentMode = mode
         updateModeUI()
+
+        // Hide all containers first
+        binding.cameraPreview.visibility = View.GONE
+        binding.layoutPhoto.visibility = View.GONE
 
         // Show/hide mode-specific UI
         when (mode) {
             TranslationMode.LIVE_CAMERA -> {
                 binding.cameraPreview.visibility = View.VISIBLE
-                binding.layoutPhoto.visibility = View.GONE
+                startCameraTranslation()
             }
 
-            TranslationMode.PHOTO, TranslationMode.SCREENSHOT -> {
-                binding.cameraPreview.visibility = View.GONE
+            TranslationMode.PHOTO -> {
                 binding.layoutPhoto.visibility = View.VISIBLE
             }
 
-            else -> {
-                binding.cameraPreview.visibility = View.GONE
-                binding.layoutPhoto.visibility = View.GONE
+            TranslationMode.SIGN_LANGUAGE -> {
+                // Show ASL camera fragment
+                val aslFragment = ASLFragment.newInstance()
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.cameraPreview, aslFragment)
+                    .commit()
+                binding.cameraPreview.visibility = View.VISIBLE
+            }
+
+            TranslationMode.VOICE, TranslationMode.TEXT_ENTRY -> {
+                // Voice/Text is the home screen, just hide other modes
+                // Already handled by hiding camera/photo above
             }
         }
     }
 
     private fun updateModeUI() {
-        // Reset all button states
-        binding.btnVoiceMode.isSelected = false
+        // Reset all button states (only mode buttons, not voice/text)
         binding.btnCameraMode.isSelected = false
         binding.btnPhotoMode.isSelected = false
-        binding.btnScreenshotMode.isSelected = false
-        binding.btnConversationMode.isSelected = false
+        binding.btnSignLanguageMode.isSelected = false
 
         // Highlight selected mode
         when (currentMode) {
-            TranslationMode.VOICE -> binding.btnVoiceMode.isSelected = true
             TranslationMode.LIVE_CAMERA -> binding.btnCameraMode.isSelected = true
             TranslationMode.PHOTO -> binding.btnPhotoMode.isSelected = true
-            TranslationMode.SCREENSHOT -> binding.btnScreenshotMode.isSelected = true
-            TranslationMode.CONVERSATION -> binding.btnConversationMode.isSelected = true
+            TranslationMode.SIGN_LANGUAGE -> binding.btnSignLanguageMode.isSelected = true
+            TranslationMode.VOICE, TranslationMode.TEXT_ENTRY -> {
+                // Voice is always active, no button to highlight
+            }
         }
     }
 
     private fun startTranslation() {
+        // Check if we're in text mode (check if text input is visible)
+        if (binding.layoutTextInput.visibility == View.VISIBLE) {
+            // Text mode - translate the typed text
+            val textToTranslate = binding.etTextInput.text.toString().trim()
+            if (textToTranslate.isEmpty()) {
+                Toast.makeText(this, "Please enter text to translate", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            // Show the original text
+            binding.tvOriginalText.text = textToTranslate
+            binding.tvOriginalText.visibility = View.VISIBLE
+
+            // Ensure service is bound
+            if (!isBound) {
+                bindTranslationService()
+                // Wait a moment for service to bind, then try translation
+                binding.btnStartStop.postDelayed({
+                    performTextTranslation(textToTranslate)
+                }, 500)
+            } else {
+                performTextTranslation(textToTranslate)
+            }
+            return
+        }
+
+        // Voice mode
         if (!isBound) {
             bindTranslationService()
         }
@@ -271,15 +362,61 @@ class MainActivity : AppCompatActivity() {
                 translationService?.startVoiceTranslation(sourceLanguage, targetLanguage)
             }
 
-            TranslationMode.CONVERSATION -> {
-                translationService?.startConversationMode(sourceLanguage, targetLanguage)
-            }
-
             TranslationMode.LIVE_CAMERA -> {
                 startCameraTranslation()
             }
 
-            else -> {}
+            TranslationMode.SIGN_LANGUAGE, TranslationMode.TEXT_ENTRY, TranslationMode.PHOTO -> {
+                // These modes don't need the translation service
+                // They handle translation internally or on-demand
+            }
+        }
+    }
+
+    private fun performTextTranslation(text: String) {
+        lifecycleScope.launch {
+            binding.progressBar.visibility = View.VISIBLE
+            try {
+                if (translationService == null) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Translation service not ready. Please try again.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    binding.progressBar.visibility = View.GONE
+                    return@launch
+                }
+
+                val translation = translationService?.translateText(
+                    text,
+                    sourceLanguage,
+                    targetLanguage
+                )
+
+                if (translation != null) {
+                    binding.tvTranslatedText.text = translation.translatedText
+                    binding.tvConfidence.text =
+                        "Confidence: ${(translation.confidence * 100).toInt()}%"
+                    binding.tvConfidence.visibility = View.VISIBLE
+                    animateTextUpdate(binding.tvTranslatedText)
+                } else {
+                    binding.tvTranslatedText.text = "Translation not available"
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Translation returned null. Check if translation engine is working.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Translation error: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+                binding.tvTranslatedText.text = "Error: ${e.message}"
+            } finally {
+                binding.progressBar.visibility = View.GONE
+            }
         }
     }
 

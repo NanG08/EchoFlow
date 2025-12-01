@@ -13,7 +13,7 @@
         android:text="EN"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:textColor="@color/purple_500" />
+        android:textColor="@color/primary" />
 
     <LinearLayout
         android:layout_width="0dp"

@@ -8,27 +8,20 @@ data class Language(
 )
 
 object SupportedLanguages {
+    // Only 11 supported languages with translation dictionaries
     val languages = listOf(
         Language("en", "English", "English", true),
-        Language("es", "Spanish", "Español", false),
-        Language("fr", "French", "Français", false),
-        Language("de", "German", "Deutsch", false),
-        Language("it", "Italian", "Italiano", false),
-        Language("pt", "Portuguese", "Português", false),
-        Language("ru", "Russian", "Русский", false),
-        Language("zh", "Chinese", "中文", false),
-        Language("ja", "Japanese", "日本語", false),
-        Language("ko", "Korean", "한국어", false),
-        Language("ar", "Arabic", "العربية", false),
-        Language("hi", "Hindi", "हिन्दी", false),
-        Language("nl", "Dutch", "Nederlands", false),
-        Language("pl", "Polish", "Polski", false),
-        Language("tr", "Turkish", "Türkçe", false),
-        Language("vi", "Vietnamese", "Tiếng Việt", false),
-        Language("th", "Thai", "ไทย", false),
-        Language("id", "Indonesian", "Bahasa Indonesia", false),
-        Language("uk", "Ukrainian", "Українська", false),
-        Language("ro", "Romanian", "Română", false)
+        Language("es", "Spanish", "Español", true),
+        Language("fr", "French", "Français", true),
+        Language("de", "German", "Deutsch", true),
+        Language("it", "Italian", "Italiano", true),
+        Language("pt", "Portuguese", "Português", true),
+        Language("ru", "Russian", "Русский", true),
+        Language("zh", "Chinese", "中文", true),
+        Language("ja", "Japanese", "日本語", true),
+        Language("ko", "Korean", "한국어", true),
+        Language("ar", "Arabic", "العربية", true),
+        Language("hi", "Hindi", "हिन्दी", true)
     )
 
     fun getLanguageByCode(code: String): Language? {

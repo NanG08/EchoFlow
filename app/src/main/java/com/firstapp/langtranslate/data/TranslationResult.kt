@@ -30,3 +30,14 @@ data class BoundingBox(
     val bottom: Float,
     val text: String
 )
+
+/**
+ * Result from ASL (American Sign Language) recognition
+ */
+data class ASLResult(
+    val character: String,
+    val confidence: Float,
+    val allProbabilities: Map<String, Float> = emptyMap(),
+    val isLowConfidence: Boolean = false,
+    val error: String? = null
+)

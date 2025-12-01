@@ -136,18 +136,6 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/btnVoiceMode"
-                style="@style/Widget.EchoFlow.Button.Outlined"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginEnd="10dp"
-                android:paddingHorizontal="20dp"
-                android:text="@string/mode_voice"
-                android:textSize="14sp"
-                android:background="@drawable/button_mode_selector"
-                android:textColor="@color/button_mode_text_color" />
-
-            <Button
                 android:id="@+id/btnCameraMode"
                 style="@style/Widget.EchoFlow.Button.Outlined"
                 android:layout_width="wrap_content"
@@ -172,24 +160,12 @@
                 android:textColor="@color/button_mode_text_color" />
 
             <Button
-                android:id="@+id/btnScreenshotMode"
-                style="@style/Widget.EchoFlow.Button.Outlined"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginEnd="10dp"
-                android:paddingHorizontal="20dp"
-                android:text="Screenshot"
-                android:textSize="14sp"
-                android:background="@drawable/button_mode_selector"
-                android:textColor="@color/button_mode_text_color" />
-
-            <Button
-                android:id="@+id/btnConversationMode"
+                android:id="@+id/btnSignLanguageMode"
                 style="@style/Widget.EchoFlow.Button.Outlined"
                 android:layout_width="wrap_content"
                 android:layout_height="42dp"
                 android:paddingHorizontal="20dp"
-                android:text="@string/mode_conversation"
+                android:text="@string/mode_sign_language"
                 android:textSize="14sp"
                 android:background="@drawable/button_mode_selector"
                 android:textColor="@color/button_mode_text_color" />
@@ -237,7 +213,7 @@
                     android:text="@string/action_select_photo" />
             </LinearLayout>
 
-            <!-- Original Text Card -->
+            <!-- Original Text Card with Input -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -252,25 +228,110 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Original"
-                        android:textSize="12sp"
-                        android:textColor="@color/text_tertiary"
-                        android:fontFamily="sans-serif-medium"
-                        android:letterSpacing="0.05" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
 
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Original"
+                            android:textSize="12sp"
+                            android:textColor="@color/text_tertiary"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.05" />
+
+                        <!-- Tab selector for Voice/Text -->
+                        <LinearLayout
+                            android:id="@+id/inputModeSelector"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:background="@drawable/rounded_background"
+                            android:padding="2dp">
+
+                            <Button
+                                android:id="@+id/chipVoice"
+                                style="@style/Widget.Material3.Button.TextButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="32dp"
+                                android:text="Voice"
+                                android:textSize="12sp"
+                                android:paddingHorizontal="16dp"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
+                                android:backgroundTint="@color/primary"
+                                android:textColor="@color/white" />
+
+                            <Button
+                                android:id="@+id/chipText"
+                                style="@style/Widget.Material3.Button.TextButton"
+                                android:layout_width="wrap_content"
+                                android:layout_height="32dp"
+                                android:text="Text"
+                                android:textSize="12sp"
+                                android:paddingHorizontal="16dp"
+                                android:minWidth="0dp"
+                                android:minHeight="0dp"
+                                android:textColor="@color/text_secondary" />
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Voice Display (default) -->
                     <TextView
                         android:id="@+id/tvOriginalText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
                         android:minHeight="120dp"
-                        android:text="Ready to translate"
+                        android:text="Say something or tap 'Text' to type..."
                         android:textSize="16sp"
                         android:textColor="@color/text_primary"
-                        android:lineSpacingExtra="4dp" />
+                        android:lineSpacingExtra="4dp"
+                        android:visibility="visible" />
+
+                    <!-- Text Input (hidden by default) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/layoutTextInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:visibility="gone"
+                        app:boxBackgroundMode="outline"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:boxStrokeColor="@color/primary"
+                        app:hintTextColor="@color/primary">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/etTextInput"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="120dp"
+                            android:gravity="top|start"
+                            android:hint="Type text to translate..."
+                            android:inputType="textMultiLine|textCapSentences"
+                            android:maxLength="500"
+                            android:textSize="16sp"
+                            android:textColor="@color/text_primary"
+                            android:lineSpacingExtra="4dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Character Counter (for text mode) -->
+                    <TextView
+                        android:id="@+id/tvCharCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="0 / 500"
+                        android:textSize="11sp"
+                        android:textColor="@color/text_tertiary"
+                        android:visibility="gone" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

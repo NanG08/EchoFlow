@@ -12,7 +12,7 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.firstapp.langtranslate.LangTranslateApp
+import com.firstapp.langtranslate.EchoFlowApp
 import com.firstapp.langtranslate.R
 import com.firstapp.langtranslate.ml.OCREngine
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +52,7 @@ class CameraFragment : Fragment() {
             targetLanguage = it.getString(ARG_TARGET_LANG, "es")
         }
 
-        val app = requireActivity().application as LangTranslateApp
+        val app = requireActivity().application as EchoFlowApp
         ocrEngine = OCREngine(requireContext(), app.modelManager)
         cameraExecutor = Executors.newSingleThreadExecutor()
     }
@@ -119,7 +119,7 @@ class CameraFragment : Fragment() {
     private fun processImageProxy(imageProxy: ImageProxy) {
         lifecycleScope.launch {
             try {
-                val bitmap = imageProxyToBitmap(imageProxy)
+                val bitmap = imageProxy.toBitmap()
 
                 // Process every 3rd frame to reduce load
                 if (imageProxy.imageInfo.timestamp % 3 == 0L) {
@@ -140,13 +140,7 @@ class CameraFragment : Fragment() {
         }
     }
 
-    private fun imageProxyToBitmap(imageProxy: ImageProxy): Bitmap {
-        // Convert ImageProxy to Bitmap
-        // In production, use proper YUV to RGB conversion
-        val width = imageProxy.width
-        val height = imageProxy.height
-        return Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    }
+
 
     override fun onDestroy() {
         super.onDestroy()

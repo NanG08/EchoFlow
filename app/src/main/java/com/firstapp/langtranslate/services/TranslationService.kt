@@ -10,12 +10,12 @@ import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
-import com.firstapp.langtranslate.LangTranslateApp
+import com.firstapp.langtranslate.EchoFlowApp
 import com.firstapp.langtranslate.R
 import com.firstapp.langtranslate.data.TranslationMode
 import com.firstapp.langtranslate.data.TranslationResult
 import com.firstapp.langtranslate.data.TranscriptionResult
-import com.firstapp.langtranslate.ml.SpeechRecognizer
+import com.firstapp.langtranslate.ml.AndroidSpeechRecognizer
 import com.firstapp.langtranslate.ml.TextToSpeech
 import com.firstapp.langtranslate.ml.TranslationEngine
 import com.firstapp.langtranslate.storage.TranslationDatabase
@@ -37,7 +37,7 @@ class TranslationService : Service() {
     private val binder = TranslationBinder()
     private val serviceScope = CoroutineScope(Dispatchers.Main + Job())
 
-    private lateinit var speechRecognizer: SpeechRecognizer
+    private lateinit var speechRecognizer: AndroidSpeechRecognizer
     private lateinit var translationEngine: TranslationEngine
     private lateinit var textToSpeech: TextToSpeech
     private lateinit var database: TranslationDatabase
@@ -66,10 +66,10 @@ class TranslationService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        val app = application as LangTranslateApp
+        val app = application as EchoFlowApp
         val modelManager = app.modelManager
 
-        speechRecognizer = SpeechRecognizer(this, modelManager)
+        speechRecognizer = AndroidSpeechRecognizer(this)
         translationEngine = TranslationEngine(this, modelManager)
         textToSpeech = TextToSpeech(this, modelManager)
         database = TranslationDatabase(this)
@@ -139,51 +139,15 @@ class TranslationService : Service() {
     }
 
     /**
-     * Start conversation mode (bidirectional)
-     */
-    fun startConversationMode(lang1: String, lang2: String) {
-        currentMode = TranslationMode.CONVERSATION
-        isRunning = true
-
-        currentJob?.cancel()
-        currentJob = serviceScope.launch {
-            var currentSourceLang = lang1
-            var currentTargetLang = lang2
-
-            speechRecognizer.startRecognition(currentSourceLang).collect { transcription ->
-                _transcriptionFlow.emit(transcription)
-
-                if (transcription.isFinal && transcription.text.isNotBlank()) {
-                    // Auto-detect language
-                    val detectedLang = translationEngine.detectLanguage(transcription.text)
-
-                    // Determine target language
-                    val targetLang = if (detectedLang == lang1) lang2 else lang1
-
-                    val result = translationEngine.translate(
-                        text = transcription.text,
-                        sourceLanguage = detectedLang,
-                        targetLanguage = targetLang,
-                        mode = currentMode
-                    )
-
-                    database.saveTranslation(result)
-                    _translationFlow.emit(result)
-                    textToSpeech.speak(result.translatedText, targetLang)
-
-                    // Switch languages for next input
-                    currentSourceLang = targetLang
-                    currentTargetLang = detectedLang
-                }
-            }
-        }
-    }
-
-    /**
      * Translate text directly
      */
     suspend fun translateText(text: String, srcLang: String, tgtLang: String): TranslationResult {
+        println("🔍 TranslationService: Translating '$text' from $srcLang to $tgtLang")
+
         val result = translationEngine.translate(text, srcLang, tgtLang, TranslationMode.VOICE)
+
+        println("✅ Translation result: '${result.translatedText}' (confidence: ${result.confidence})")
+
         database.saveTranslation(result)
         return result
     }
@@ -249,7 +213,7 @@ class TranslationService : Service() {
      */
     private fun createNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("LangTranslate")
+            .setContentTitle("EchoFlow")
             .setContentText("Translation service running")
             .setSmallIcon(R.drawable.ic_launcher_foreground)
             .setPriority(NotificationCompat.PRIORITY_LOW)
