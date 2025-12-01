@@ -68,7 +68,7 @@ zero latency. All processing happens locally on your device - no cloud, no delay
 1. **Clone the repository**:
 
 ```bash
-git clone https://github.com/yourusername/EchoFlow.git
+git clone https://github.com/NanG08/EchoFlow.git
 cd EchoFlow
 ```
 
@@ -361,10 +361,8 @@ limitations under the License.
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/EchoFlow/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/EchoFlow/discussions)
-- **Email**: support@echoflow.app
-
+- **Issues**: [GitHub Issues](https://github.com/NanG08/EchoFlow/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/NanG08/EchoFlow/discussions)
 ---
 
 <div align="center">
