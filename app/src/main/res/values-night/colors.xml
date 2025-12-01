@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Mode Colors for EchoFlow -->
+
+    <!-- Base Colors -->
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- Primary Accent - Electric Teal (stays same) -->
+    <color name="primary">#2DD4BF</color>
+    <color name="primary_dark">#14B8A6</color>
+    <color name="primary_light">#5EEAD4</color>
+
+    <!-- Dark Neutral Palette -->
+    <color name="background">#121212</color>
+    <color name="surface">#1E1E1E</color>
+    <color name="surface_variant">#2A2A2A</color>
+    <color name="divider">#3A3A3A</color>
+
+    <!-- Dark Text Colors -->
+    <color name="text_primary">#F5F5F5</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_tertiary">#808080</color>
+    <color name="text_on_primary">#000000</color>
+
+    <!-- State Colors (stays same) -->
+    <color name="active">#14B8A6</color>
+    <color name="inactive">#3A3A3A</color>
+    <color name="error">#EF4444</color>
+    <color name="success">#10B981</color>
+    <color name="warning">#F59E0B</color>
+
+    <!-- Overlay Colors -->
+    <color name="overlay_light">#10FFFFFF</color>
+    <color name="overlay_medium">#40FFFFFF</color>
+    <color name="overlay_dark">#80FFFFFF</color>
+
+    <!-- Ripple Effect -->
+    <color name="ripple">#2014B8A6</color>
+    <color name="ripple_dark">#4014B8A6</color>
+
+    <!-- Shadow Colors -->
+    <color name="shadow_light">#20000000</color>
+    <color name="shadow_medium">#40000000</color>
+</resources>
