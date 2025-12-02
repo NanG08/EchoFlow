@@ -68,7 +68,7 @@ class ASLFragment : Fragment() {
         lifecycleScope.launch {
             tvConfidence.text = "Initializing ASL model..."
 
-            val initialized = aslRecognizer.initialize()
+            val initialized = aslRecognizer.finitialize()
             if (initialized) {
                 tvConfidence.text = "Model loaded! Make ASL signs..."
                 startCamera()

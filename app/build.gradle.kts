@@ -69,8 +69,10 @@ dependencies {
     implementation(libs.tensorflow.lite)
     implementation(libs.tensorflow.lite.support)
     implementation(libs.tensorflow.lite.gpu)
-    implementation(libs.tensorflow.lite.task.vision)
+    implementation("org.tensorflow:tensorflow-lite-task-vision:0.4.4")
     implementation(libs.tensorflow.lite.task.text)
+
+    implementation(libs.mediapipe.tasks.vision)
 
     implementation("com.google.mlkit:translate:17.0.3")
     implementation("com.google.mlkit:language-id:17.0.4")
@@ -79,6 +81,7 @@ dependencies {
 
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
+//    implementation(libs.tasks.vision)
     kapt(libs.room.compiler)
 
     implementation(libs.work.runtime.ktx)
