@@ -3,7 +3,6 @@ package com.firstapp.langtranslate.services
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -28,10 +27,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
-/**
- * Foreground service for continuous translation
- * Handles voice recognition, translation, and TTS
- */
 class TranslationService : Service() {
 
     private val binder = TranslationBinder()
@@ -88,27 +83,21 @@ class TranslationService : Service() {
         fun getService(): TranslationService = this@TranslationService
     }
 
-    /**
-     * Start real-time voice translation
-     */
     fun startVoiceTranslation(srcLang: String, tgtLang: String) {
         sourceLanguage = srcLang
         targetLanguage = tgtLang
         currentMode = TranslationMode.VOICE
         isRunning = true
 
-        // Set wake word mode on speech recognizer
         speechRecognizer.setWakeWordEnabled(wakeWordEnabled)
 
         currentJob?.cancel()
         currentJob = serviceScope.launch {
             speechRecognizer.startRecognition(sourceLanguage).collect { transcription ->
-                // Emit transcription (only real text, no placeholders)
                 if (transcription.text.isNotBlank()) {
                     _transcriptionFlow.emit(transcription)
                 }
 
-                // Translate when final
                 if (transcription.isFinal && transcription.text.isNotBlank()) {
                     val detected = if (autoDetect) {
                         translationEngine.detectLanguage(transcription.text)
@@ -123,13 +112,9 @@ class TranslationService : Service() {
                         mode = currentMode
                     )
 
-                    // Save to database
                     database.saveTranslation(result)
-
-                    // Emit translation
                     _translationFlow.emit(result)
 
-                    // Auto-play TTS if enabled
                     if (autoPlayTTS && result.translatedText.isNotBlank()) {
                         textToSpeech.speak(result.translatedText, targetLanguage)
                     }
@@ -138,23 +123,17 @@ class TranslationService : Service() {
         }
     }
 
-    /**
-     * Translate text directly
-     */
     suspend fun translateText(text: String, srcLang: String, tgtLang: String): TranslationResult {
-        println("🔍 TranslationService: Translating '$text' from $srcLang to $tgtLang")
+        println("TranslationService: Translating '$text' from $srcLang to $tgtLang")
 
         val result = translationEngine.translate(text, srcLang, tgtLang, TranslationMode.VOICE)
 
-        println("✅ Translation result: '${result.translatedText}' (confidence: ${result.confidence})")
+        println("Translation result: '${result.translatedText}' (confidence: ${result.confidence})")
 
         database.saveTranslation(result)
         return result
     }
 
-    /**
-     * Stop translation
-     */
     fun stopTranslation() {
         isRunning = false
         currentJob?.cancel()
@@ -162,36 +141,21 @@ class TranslationService : Service() {
         textToSpeech.stop()
     }
 
-    /**
-     * Set auto language detection
-     */
     fun setAutoDetect(enabled: Boolean) {
         autoDetect = enabled
     }
 
-    /**
-     * Set wake word detection
-     */
     fun setWakeWordEnabled(enabled: Boolean) {
         wakeWordEnabled = enabled
         speechRecognizer.setWakeWordEnabled(enabled)
     }
 
-    /**
-     * Set auto-play TTS
-     */
     fun setAutoPlayTTS(enabled: Boolean) {
         autoPlayTTS = enabled
     }
 
-    /**
-     * Check if service is running
-     */
     fun isRunning(): Boolean = isRunning
 
-    /**
-     * Create notification channel
-     */
     private fun createNotificationChannel() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -208,9 +172,6 @@ class TranslationService : Service() {
         }
     }
 
-    /**
-     * Create notification
-     */
     private fun createNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("EchoFlow")
