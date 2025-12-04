@@ -8,7 +8,8 @@ zero-latency voice recognition.
 [![Material Design](https://img.shields.io/badge/Material-Design%203-teal.svg)](https://m3.material.io)
 [![License](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](LICENSE)
 
-![EchoFlow Banner](https://via.placeholder.com/800x200/14B8A6/FFFFFF?text=EchoFlow+-+Zero-Latency+Voice+Translation)
+
+![EchoFlow Banner](docs\imgs\EchoFlow.png)
 
 ## 🎯 Overview
 
@@ -194,38 +195,11 @@ See [RUNANYWHERE_INTEGRATION.md](RUNANYWHERE_INTEGRATION.md) for detailed integr
 - Natural turn-taking
 - Context preservation
 
-## 🎨 UI Design
 
-### Design Principles
-
-- ✅ **Minimal**: Clean, uncluttered interface
-- ✅ **Modern**: Material Design 3 components
-- ✅ **Whitespace**: Generous padding and spacing
-- ✅ **Typography**: Sans-serif, medium weight
-- ✅ **Accent**: Electric teal (#14B8A6)
-- ✅ **Cards**: Rounded corners (16dp)
-- ✅ **Shadows**: Subtle elevation
-- ✅ **Animations**: Smooth transitions
-
-### Color Palette
-
-**Light Mode**:
-
-- Background: `#FAFAFA`
-- Surface: `#FFFFFF`
-- Primary: `#14B8A6` (Electric Teal)
-- Text: `#1F1F1F` / `#6B7280`
-
-**Dark Mode**:
-
-- Background: `#121212`
-- Surface: `#1E1E1E`
-- Primary: `#2DD4BF` (Brighter Teal)
-- Text: `#F5F5F5` / `#B0B0B0`
 
 ## 🌍 Supported Languages
 
-Currently supporting **20+ languages**:
+Currently supporting **11 languages**:
 
 | Language | Code | Status |
 |----------|------|--------|
@@ -352,7 +326,6 @@ limitations under the License.
 
 - [RunAnywhere SDK](https://github.com/RunanywhereAI/runanywhere-sdks) - On-device AI toolkit
 - TensorFlow Lite - ML framework
-- Material Design - UI guidelines
 - Android Jetpack - Modern Android development
 
 ## 📞 Support
