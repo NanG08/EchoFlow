@@ -17,14 +17,33 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-            debugSymbolLevel = "FULL"
+            // Keep all architectures - MediaPipe needs them
+            abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64"))
+        }
+    }
+
+    splits {
+        abi {
+            // Enable building separate APKs per architecture
+            isEnable = true
+            // Reset the default list to include all ABIs
+            reset()
+            // Include all supported architectures
+            include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+            // Enable universal APK (contains all architectures)
+            isUniversalApk = true
         }
     }
 
     packaging {
         jniLibs {
             useLegacyPackaging = true
+            // Keep all native libraries
+            keepDebugSymbols += "**/*.so"
+        }
+        // Prevent native libraries from being stripped
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
 
@@ -35,6 +54,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            // Ensure native libraries are not stripped in debug builds
+            isJniDebuggable = true
         }
     }
 

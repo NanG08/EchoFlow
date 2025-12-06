@@ -188,13 +188,15 @@
             android:padding="20dp">
 
             <!-- Camera Preview (Hidden by default) -->
-            <FrameLayout
+            <!-- Camera Preview (Hidden by default) -->
+            <androidx.camera.view.PreviewView
                 android:id="@+id/cameraPreview"
                 android:layout_width="match_parent"
                 android:layout_height="280dp"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/rounded_background_dark"
-                android:visibility="gone" />
+                android:visibility="gone"
+                app:scaleType="fillCenter"/>
+
 
             <!-- Photo Layout (Hidden by default) -->
             <LinearLayout

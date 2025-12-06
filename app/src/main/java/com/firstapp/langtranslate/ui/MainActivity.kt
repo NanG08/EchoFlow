@@ -32,8 +32,8 @@ import com.firstapp.langtranslate.EchoFlowApp
 import com.firstapp.langtranslate.R
 import com.firstapp.langtranslate.data.TranslationMode
 import com.firstapp.langtranslate.databinding.ActivityMainBinding
-import com.firstapp.langtranslate.ml.ASLRecognizer // <<< CHANGE HERE
-import com.firstapp.langtranslate.ml.OCREngine // Keep for photo mode
+import com.firstapp.langtranslate.ml.ASLRecognizer
+import com.firstapp.langtranslate.ml.OCREngine
 import com.firstapp.langtranslate.services.TranslationService
 import com.firstapp.langtranslate.storage.TranslationDatabase
 import com.google.common.util.concurrent.ListenableFuture
@@ -48,14 +48,11 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
     private var camera: Camera? = null
-
-    // We now have two engines for different purposes
-    private lateinit var aslRecognizer: ASLRecognizer // <<< ADD THIS
-    private lateinit var ocrEngine: OCREngine // For single photo OCR
-
+    private lateinit var ocrEngine: OCREngine
+    private lateinit var aslRecognizer: ASLRecognizer
     private lateinit var database: TranslationDatabase
     private lateinit var vibrator: Vibrator
-    // ... (rest of your properties are fine)
+
     private var currentMode = TranslationMode.VOICE
     private var sourceLanguage = "en"
     private var targetLanguage = "es"
@@ -95,17 +92,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         val app = application as EchoFlowApp
-        // Initialize both engines
-        aslRecognizer = ASLRecognizer(this) // <<< ADD THIS
-        ocrEngine = OCREngine(this, app.modelManager) // Keep this for photo mode
-
+        ocrEngine = OCREngine(this, app.modelManager)
+        aslRecognizer = ASLRecognizer(this)
         database = TranslationDatabase(this)
         vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
@@ -119,9 +113,7 @@ class MainActivity : AppCompatActivity() {
         bindTranslationService()
     }
 
-    // ... (Your UI setup methods remain the same)
     private fun setupUI() {
-        // Voice/Text toggle buttons
         binding.chipVoice.setOnClickListener {
             showVoiceInput()
             performHapticFeedback()
@@ -142,7 +134,6 @@ class MainActivity : AppCompatActivity() {
             binding.chipVoice.setTextColor(ContextCompat.getColor(this, R.color.text_secondary))
         }
 
-        // Text input character counter
         binding.etTextInput.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -151,7 +142,6 @@ class MainActivity : AppCompatActivity() {
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
-        // Mode selection buttons
         binding.btnCameraMode.setOnClickListener {
             performHapticFeedback()
             switchMode(TranslationMode.LIVE_CAMERA)
@@ -164,10 +154,9 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnSignLanguageMode.setOnClickListener {
             performHapticFeedback()
-            switchMode(TranslationMode.SIGN_LANGUAGE) // This will now trigger the ASL Recognizer
+            switchMode(TranslationMode.SIGN_LANGUAGE)
         }
 
-        // Translation control
         binding.btnStartStop.setOnClickListener {
             if (isTranslating) {
                 stopTranslation()
@@ -176,17 +165,13 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Language selection
         binding.btnSourceLanguage.setOnClickListener { showLanguageSelector(true) }
         binding.btnTargetLanguage.setOnClickListener { showLanguageSelector(false) }
         binding.btnSwapLanguages.setOnClickListener { swapLanguages() }
-
-        // Other UI setup
         binding.btnSelectPhoto.setOnClickListener { photoPickerLauncher.launch("image/*") }
         binding.btnHistory.setOnClickListener { showHistory() }
         binding.btnSettings.setOnClickListener { showSettings() }
 
-        // Wake word toggle
         binding.switchWakeWord.setOnCheckedChangeListener { _, isChecked ->
             wakeWordEnabled = isChecked
             translationService?.setWakeWordEnabled(isChecked)
@@ -202,30 +187,20 @@ class MainActivity : AppCompatActivity() {
         val permissionsToRequest = requiredPermissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
-
         if (permissionsToRequest.isNotEmpty()) {
-            ActivityCompat.requestPermissions(
-                this,
-                permissionsToRequest.toTypedArray(),
-                PERMISSION_REQUEST_CODE
-            )
+            ActivityCompat.requestPermissions(this, permissionsToRequest.toTypedArray(), PERMISSION_REQUEST_CODE)
         }
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                // If permissions granted, restart the current camera mode if applicable
                 if (currentMode == TranslationMode.LIVE_CAMERA || currentMode == TranslationMode.SIGN_LANGUAGE) {
-                    startCameraTranslation()
+                    startCamera()
                 }
             } else {
-                Toast.makeText(this, "Permissions required for this feature.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Permissions are required for this feature.", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -255,7 +230,6 @@ class MainActivity : AppCompatActivity() {
         binding.cameraPreview.visibility = View.GONE
         binding.layoutPhoto.visibility = View.GONE
 
-        // Unbind camera if switching to a non-camera mode
         if (mode != TranslationMode.LIVE_CAMERA && mode != TranslationMode.SIGN_LANGUAGE) {
             cameraProviderFuture.get().unbindAll()
         }
@@ -263,7 +237,7 @@ class MainActivity : AppCompatActivity() {
         when (mode) {
             TranslationMode.LIVE_CAMERA, TranslationMode.SIGN_LANGUAGE -> {
                 binding.cameraPreview.visibility = View.VISIBLE
-                startCameraTranslation() // A single method can now handle both
+                startCamera()
             }
             TranslationMode.PHOTO -> {
                 binding.layoutPhoto.visibility = View.VISIBLE
@@ -277,6 +251,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnPhotoMode.isSelected = currentMode == TranslationMode.PHOTO
         binding.btnSignLanguageMode.isSelected = currentMode == TranslationMode.SIGN_LANGUAGE
     }
+
     private fun startTranslation() {
         if (binding.layoutTextInput.visibility == View.VISIBLE) {
             val textToTranslate = binding.etTextInput.text.toString().trim()
@@ -355,50 +330,71 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun startCameraTranslation() {
+    /**
+     * This is the single, corrected function to start the camera and its analyzers.
+     */
+    private fun startCamera() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            Toast.makeText(this, "Camera permission is required.", Toast.LENGTH_SHORT).show()
             checkPermissions()
             return
         }
+
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
-            bindCameraUseCases(cameraProvider)
+            cameraProvider.unbindAll()
+
+            // This now works because activity_main.xml uses <androidx.camera.view.PreviewView>
+            val preview = Preview.Builder().build().also {
+                it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
+            }
+
+            val cameraSelector = if (currentMode == TranslationMode.SIGN_LANGUAGE) {
+                CameraSelector.DEFAULT_FRONT_CAMERA
+            } else {
+                CameraSelector.DEFAULT_BACK_CAMERA
+            }
+
+            // Both ASLRecognizer and OCREngine should implement ImageAnalysis.Analyzer
+            val analyzer = if (currentMode == TranslationMode.SIGN_LANGUAGE) {
+                aslRecognizer
+            } else {
+                ocrEngine
+            }
+
+            val imageAnalysis = ImageAnalysis.Builder()
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .build()
+                .also {
+                    it.setAnalyzer(Executors.newSingleThreadExecutor(), analyzer)
+                }
+
+            observeAnalyzerResults()
+
+            try {
+                camera = cameraProvider.bindToLifecycle(
+                    this as LifecycleOwner,
+                    cameraSelector,
+                    preview,
+                    imageAnalysis
+                )
+            } catch (exc: Exception) {
+                Log.e("MainActivity", "Use case binding failed", exc)
+                Toast.makeText(this, "Failed to start camera.", Toast.LENGTH_SHORT).show()
+            }
+
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun bindCameraUseCases(cameraProvider: ProcessCameraProvider) {
-        val preview = Preview.Builder().build().also {
-            it.setSurfaceProvider(binding.cameraPreview.surfaceProvider)
-        }
+    private fun observeAnalyzerResults() {
+        // Remove previous observers to prevent duplicate updates
+        aslRecognizer.recognizedLetter.removeObservers(this)
+        ocrEngine.ocrResult.removeObservers(this)
 
-        // Use a front-facing camera for sign language
-        val cameraSelector = if (currentMode == TranslationMode.SIGN_LANGUAGE) {
-            CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_FRONT).build()
-        } else {
-            CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
-        }
-
-        // Choose the correct analyzer based on the current mode
-        val analyzer = if (currentMode == TranslationMode.SIGN_LANGUAGE) {
-            aslRecognizer
-        } else {
-            ocrEngine
-        }
-
-        val imageAnalysis = ImageAnalysis.Builder()
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .build()
-            .also {
-                it.setAnalyzer(Executors.newSingleThreadExecutor(), analyzer)
-            }
-
-        // Observe results from the appropriate engine
         if (currentMode == TranslationMode.SIGN_LANGUAGE) {
             aslRecognizer.recognizedLetter.observe(this) { letter ->
                 binding.tvOriginalText.text = letter
-                // You might want to translate this letter or append it
-                binding.tvTranslatedText.text = letter // Simple echo for now
+                binding.tvTranslatedText.text = letter // Echo result for now
             }
         } else { // LIVE_CAMERA OCR mode
             ocrEngine.ocrResult.observe(this) { resultText ->
@@ -408,27 +404,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-
-        try {
-            cameraProvider.unbindAll()
-            camera = cameraProvider.bindToLifecycle(
-                this as LifecycleOwner,
-                cameraSelector,
-                preview,
-                imageAnalysis
-            )
-        } catch (exc: Exception) {
-            Log.e("MainActivity", "Camera binding failed", exc)
-            Toast.makeText(this, "Could not start camera.", Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun processImageForOCR(bitmap: Bitmap) {
         lifecycleScope.launch {
             binding.progressBar.visibility = View.VISIBLE
             try {
-                // Use the ocrEngine specifically for single photos
                 val result = ocrEngine.recognizeText(bitmap, sourceLanguage)
                 if (result.text.isNotBlank()) {
                     binding.tvOriginalText.text = result.text
@@ -444,7 +425,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ... (The rest of your MainActivity file is fine)
     private fun showLanguageSelector(isSource: Boolean) { /* Placeholder */ }
     private fun swapLanguages() {
         val temp = sourceLanguage

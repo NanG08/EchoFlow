@@ -16,7 +16,7 @@ room = "2.6.1"
 work = "2.9.0"
 coreKtxVersion = "1.17.0"
 tasksVision = "0.10.14"
-mediapipeVision ="0.10.14"
+mediapipeVision = "0.10.15"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
